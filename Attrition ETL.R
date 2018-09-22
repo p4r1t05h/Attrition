@@ -1,7 +1,6 @@
 rm(list = ls())
 getwd()
 dir()
-dir.create("ETL Attrition")
 setwd("D:/Data Science/ETLHive/Projects/Attrition")
 getwd()
 
@@ -9,11 +8,16 @@ getwd()
 
 library(xlsx)
 library(dplyr)
+library(tree)
+library(e1071)
+library(randomForest)
+library(class)
+
 
 #Loading Data
 
 attrition<-read.xlsx("Attrition Case Study.xlsx", sheetIndex = 1, header = T)
-att<-attrition
+att<-data.frame(attrition)
 
 str(att)
 
@@ -39,7 +43,7 @@ str(att)
 table(is.na(att))
 
 #Creating new Predictor Age Group
-?cut
+
 Age_Group<-cut(att$Age, breaks = 2, labels = c("Young","Old"))
 att<-cbind(att, Age_Group)
 str(att)
@@ -400,501 +404,380 @@ pie(agegroup)
 #======================================================
 
 #Bivariate Analysis
-#Q->Q (Q=Monthly Income)
+#C->C (C=Attrition)
 
-#Numerical Analysis of Age-> Monthly Income
+#Numerical Analysis of Business Travel-> Attrition
 
-qq1<-cor(att$Age, att$MonthlyIncome)
-qq1
+cc1<-table(att$BusinessTravel, att$Attrition)
+cc1.prop<-prop.table(cc1)*100
+cc1.prop
 
-#Visualization
+#Dependency Test
 
-plot(att$Age~att$MonthlyIncome)
+cc1.test<-chisq.test(att$BusinessTravel, att$Attrition)
+cc1.test
 
-#Dependency test
-#t Test for Slope
-
-qq1.test<-lm(Age~MonthlyIncome, data = att)
-summary(qq1.test)
-abline(qq1.test)
-
-#Dependent
-#Numerical Analysis of Daily Rate-> Monthly Income
-
-qq2<-cor(att$DailyRate, att$MonthlyIncome)
-qq2
-
-#Visualization
-
-plot(att$DailyRate~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq2.test<-lm(DailyRate~MonthlyIncome, data = att)
-summary(qq2.test)
-abline(qq2.test)
-
-#InDependent
-
-#Numerical Analysis of Distance From Home-> Monthly Income
-
-qq3<-cor(att$DistanceFromHome, att$MonthlyIncome)
-qq3
-
-#Visualization
-
-plot(att$DistanceFromHome~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq3.test<-lm(DistanceFromHome~MonthlyIncome, data = att)
-summary(qq3.test)
-abline(qq3.test)
-
-#InDependent
-
-#Numerical Analysis of Hourly Rate-> Monthly Income
-
-qq4<-cor(att$HourlyRate, att$MonthlyIncome)
-qq4
-
-#Visualization
-
-plot(att$HourlyRate~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq4.test<-lm(HourlyRate~MonthlyIncome, data = att)
-summary(qq4.test)
-abline(qq4.test)
-
-#InDependent
-
-#Numerical Analysis of Monthly Rate-> Monthly Income
-
-qq5<-cor(att$MonthlyRate, att$MonthlyIncome)
-qq5
-
-#Visualization
-
-plot(att$MonthlyRate~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq5.test<-lm(MonthlyRate~MonthlyIncome, data = att)
-summary(qq5.test)
-abline(qq5.test)
-
-#InDependent
-
-#Numerical Analysis of Number of Companies Worked-> Monthly Income
-
-qq6<-cor(att$NumCompaniesWorked, att$MonthlyIncome)
-qq6
-
-#Visualization
-
-plot(att$NumCompaniesWorked~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq6.test<-lm(NumCompaniesWorked~MonthlyIncome, data = att)
-summary(qq6.test)
-abline(qq6.test)
 
 #Dependent
 
-#Numerical Analysis of Percent Salary Hike-> Monthly Income
+#Numerical Analysis of Department-> Attrition
 
-qq7<-cor(att$PercentSalaryHike, att$MonthlyIncome)
-qq7
+cc2<-table(att$Department, att$Attrition)
+cc2.prop<-prop.table(cc2)*100
+cc2.prop
 
-#Visualization
+#Dependency Test
 
-plot(att$PercentSalaryHike~att$MonthlyIncome)
+cc2.test<-chisq.test(att$Department, att$Attrition)
+cc2.test
 
-#Dependency test
-#t Test for Slope
-
-qq7.test<-lm(PercentSalaryHike~MonthlyIncome, data = att)
-summary(qq7.test)
-abline(qq7.test)
-
-#InDependent
-
-#Numerical Analysis of Total Working Years-> Monthly Income
-
-qq8<-cor(att$TotalWorkingYears, att$MonthlyIncome)
-qq8
-
-#Visualization
-
-plot(att$TotalWorkingYears~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq8.test<-lm(TotalWorkingYears~MonthlyIncome, data = att)
-summary(qq8.test)
-abline(qq8.test)
 
 #Dependent
 
-#Numerical Analysis of Training Times Last Year-> Monthly Income
+str(att)
 
-qq9<-cor(att$TrainingTimesLastYear, att$MonthlyIncome)
-qq9
+#Numerical Analysis of Education-> Attrition
 
-#Visualization
+cc3<-table(att$Education, att$Attrition)
+cc3.prop<-prop.table(cc3)*100
+cc3.prop
 
-plot(att$TrainingTimesLastYear~att$MonthlyIncome)
+#Dependency Test
 
-#Dependency test
-#t Test for Slope
+cc3.test<-chisq.test(att$Education, att$Attrition)
+cc3.test
 
-qq9.test<-lm(TrainingTimesLastYear~MonthlyIncome, data = att)
-summary(qq9.test)
-abline(qq9.test)
+#INDependent
 
-#InDependent
+str(att)
 
-#Numerical Analysis of Years At Company-> Monthly Income
+#Numerical Analysis of Education Field-> Attrition
 
-qq10<-cor(att$YearsAtCompany, att$MonthlyIncome)
-qq10
+cc4<-table(att$EducationField, att$Attrition)
+cc4.prop<-prop.table(cc4)*100
+cc4.prop
 
-#Visualization
+#Dependency Test
 
-plot(att$YearsAtCompany~att$MonthlyIncome)
-
-#Dependency test
-#t Test for Slope
-
-qq10.test<-lm(YearsAtCompany~MonthlyIncome, data = att)
-summary(qq10.test)
-abline(qq10.test)
+cc4.test<-chisq.test(att$EducationField, att$Attrition)
+cc4.test
 
 #Dependent
 
-#Numerical Analysis of Years In Current Role-> Monthly Income
+str(att)
 
-qq11<-cor(att$YearsInCurrentRole, att$MonthlyIncome)
-qq11
+#Numerical Analysis of job Involvement-> Attrition
 
-#Visualization
+cc5<-table(att$JobInvolvement, att$Attrition)
+cc5.prop<-prop.table(cc5)*100
+cc5.prop
 
-plot(att$YearsInCurrentRole~att$MonthlyIncome)
+#Dependency Test
 
-#Dependency test
-#t Test for Slope
-
-qq11.test<-lm(YearsInCurrentRole~MonthlyIncome, data = att)
-summary(qq11.test)
-abline(qq11.test)
+cc5.test<-chisq.test(att$JobInvolvement, att$Attrition)
+cc5.test
 
 #Dependent
 
-#Numerical Analysis of Years Since Last Promotion-> Monthly Income
+str(att)
 
-qq12<-cor(att$YearsSinceLastPromotion, att$MonthlyIncome)
-qq12
+#Numerical Analysis of Job Level-> Attrition
 
-#Visualization
+cc6<-table(att$JobLevel, att$Attrition)
+cc6.prop<-prop.table(cc6)*100
+cc6.prop
 
-plot(att$YearsSinceLastPromotion~att$MonthlyIncome)
+#Dependency Test
 
-#Dependency test
-#t Test for Slope
-
-qq12.test<-lm(YearsSinceLastPromotion~MonthlyIncome, data = att)
-summary(qq12.test)
-abline(qq12.test)
+cc6.test<-chisq.test(att$JobLevel, att$Attrition)
+cc6.test
 
 #Dependent
 
-#Numerical Analysis of Years With Current Manager-> Monthly Income
+str(att)
 
-qq13<-cor(att$YearsWithCurrManager, att$MonthlyIncome)
-qq13
+#Numerical Analysis of Job Level-> Attrition
 
-#Visualization
+cc7<-table(att$JobRole, att$Attrition)
+cc7.prop<-prop.table(cc7)*100
+cc7.prop
 
-plot(att$YearsWithCurrManager~att$MonthlyIncome)
+#Dependency Test
 
-#Dependency test
-#t Test for Slope
-
-qq13.test<-lm(MonthlyIncome~YearsWithCurrManager, data = att)
-summary(qq13.test)
-abline(qq13.test)
+cc7.test<-chisq.test(att$JobRole, att$Attrition)
+cc7.test
 
 #Dependent
 
-#============================================================
-#C->Q (Q=Monthly Income)
-
 str(att)
 
-#Numerical Analysis of Business Travel-> Monthly Income
+#Numerical Analysis of Job Satisfaction-> Attrition
 
-cq1<-boxplot(att$MonthlyIncome~att$BusinessTravel)
-cq1$stats
-tapply(att$MonthlyIncome, att$BusinessTravel, summary)
-
-#Dependency test
-
-
-cq1.aov<-aov(att$MonthlyIncome~att$BusinessTravel)
-summary(cq1.aov)
-
-#InDependent
-
-#Numerical Analysis of Department-> Monthly Income
-
-cq2<-boxplot(att$MonthlyIncome~att$Department)
-cq2$stats
-tapply(att$MonthlyIncome, att$Department, summary)
+cc8<-table(att$JobSatisfaction, att$Attrition)
+cc8.prop<-prop.table(cc8)*100
+cc8.prop
 
 #Dependency Test
 
-cq2.aov<-aov(att$MonthlyIncome~att$Department)
-summary(cq2.aov)
+cc8.test<-chisq.test(att$JobSatisfaction, att$Attrition)
+cc8.test
 
 #Dependent
 
-#Numerical Analysis of Education-> Monthly Income
+str(att)
 
-cq3<-boxplot(att$MonthlyIncome~att$Education)
-cq3$stats
-tapply(att$MonthlyIncome, att$Education, summary)
+#Numerical Analysis of Job Level-> Attrition
+
+cc9<-table(att$MaritalStatus, att$Attrition)
+cc9.prop<-prop.table(cc9)*100
+cc9.prop
 
 #Dependency Test
 
-cq3.aov<-aov(att$MonthlyIncome~att$Education)
-summary(cq3.aov)
+cc9.test<-chisq.test(att$MaritalStatus, att$Attrition)
+cc9.test
 
 #Dependent
 
-#Numerical Analysis of Education Field-> Monthly Income
-
-cq4<-boxplot(att$MonthlyIncome~att$EducationField)
-cq4$stats
-tapply(att$MonthlyIncome, att$EducationField, summary)
-
-#Dependency Test
-
-cq4.aov<-aov(att$MonthlyIncome~att$EducationField)
-summary(cq4.aov)
-
-par(mfrow=c(1,1))
-
-#InDependent
-
-#Numerical Analysis of Education Field-> Monthly Income
-
 str(att)
 
-cq5<-boxplot(att$MonthlyIncome~att$EnvironmentSatisfaction)
-cq5$stats
-tapply(att$MonthlyIncome, att$EnvironmentSatisfaction, summary)
+#Numerical Analysis of overtime-> Attrition
+
+cc10<-table(att$OverTime, att$Attrition)
+cc10.prop<-prop.table(cc10)*100
+cc10.prop
 
 #Dependency Test
 
-cq5.aov<-aov(att$MonthlyIncome~att$EnvironmentSatisfaction)
-summary(cq5.aov)
-
-#InDependent
-
-#Numerical Analysis of Gender-> Monthly Income
-
-str(att)
-
-cq6<-boxplot(att$MonthlyIncome~att$Gender)
-cq6$stats
-tapply(att$MonthlyIncome, att$Gender, summary)
-
-#Dependency Test
-
-cq6.test<-t.test(att$MonthlyIncome~att$Gender, alternative = "t")
-cq6.test
-
-#InDependent
-
-#Numerical Analysis of Job Involvement-> Monthly Income
-
-str(att)
-
-cq7<-boxplot(att$MonthlyIncome~att$JobInvolvement)
-cq7$stats
-tapply(att$MonthlyIncome, att$JobInvolvement, summary)
-
-#Dependency Test
-
-cq7.aov<-aov(att$MonthlyIncome~att$JobInvolvement)
-summary(cq7.aov)
-
-#InDependent
-
-#Numerical Analysis of Job Level-> Monthly Income
-
-str(att)
-
-cq8<-boxplot(att$MonthlyIncome~att$JobLevel)
-cq8$stats
-tapply(att$MonthlyIncome, att$JobLevel, summary)
-
-#Dependency Test
-
-cq8.aov<-aov(att$MonthlyIncome~att$JobLevel)
-summary(cq8.aov)
+cc10.test<-chisq.test(att$OverTime, att$Attrition)
+cc10.test
 
 #Dependent
 
-#Numerical Analysis of Job Role-> Monthly Income
-
 str(att)
 
-cq9<-boxplot(att$MonthlyIncome~att$JobRole)
-cq9$stats
-tapply(att$MonthlyIncome, att$JobRole, summary)
+#Numerical Analysis of Performance Rating-> Attrition
+
+cc11<-table(att$PerformanceRating, att$Attrition)
+cc11.prop<-prop.table(cc11)*100
+cc11.prop
 
 #Dependency Test
 
-cq9.aov<-aov(att$MonthlyIncome~att$JobRole)
-summary(cq9.aov)
+cc11.test<-chisq.test(att$PerformanceRating, att$Attrition)
+cc11.test
+
+#InDependent
+
+str(att)
+
+#Numerical Analysis of Relationship Satisfaction-> Attrition
+
+cc12<-table(att$RelationshipSatisfaction, att$Attrition)
+cc12.prop<-prop.table(cc12)*100
+cc12.prop
+
+#Dependency Test
+
+cc12.test<-chisq.test(att$RelationshipSatisfaction, att$Attrition)
+cc12.test
+
+#InDependent
+
+str(att)
+
+#Numerical Analysis of Stock Option-> Attrition
+
+cc13<-table(att$StockOptionLevel, att$Attrition)
+cc13.prop<-prop.table(cc13)*100
+cc13.prop
+
+#Dependency Test
+
+cc13.test<-chisq.test(att$StockOptionLevel, att$Attrition)
+cc13.test
 
 #Dependent
 
-#Numerical Analysis of Job Satisfaction-> Monthly Income
-
 str(att)
 
-cq10<-boxplot(att$MonthlyIncome~att$JobSatisfaction)
-cq10$stats
-tapply(att$MonthlyIncome, att$JobSatisfaction, summary)
+#Numerical Analysis of Work Life Balance-> Attrition
+
+cc14<-table(att$WorkLifeBalance, att$Attrition)
+cc14.prop<-prop.table(cc14)*100
+cc14.prop
 
 #Dependency Test
 
-cq10.aov<-aov(att$MonthlyIncome~att$JobSatisfaction)
-summary(cq10.aov)
-
-#InDependent
-
-#Numerical Analysis of Marital Status-> Monthly Income
-
-str(att)
-
-cq11<-boxplot(att$MonthlyIncome~att$MaritalStatus)
-cq11$stats
-tapply(att$MonthlyIncome, att$MaritalStatus, summary)
-
-#Dependency Test
-
-cq11.aov<-aov(att$MonthlyIncome~att$MaritalStatus)
-summary(cq11.aov)
+cc14.test<-chisq.test(att$WorkLifeBalance, att$Attrition)
+cc14.test
 
 #Dependent
 
-#Numerical Analysis of Overtime -> Monthly Income
-
 str(att)
 
-cq12<-boxplot(att$MonthlyIncome~att$OverTime)
-cq12$stats
-tapply(att$MonthlyIncome, att$OverTime, summary)
+#Numerical Analysis of age Group-> Attrition
+
+cc15<-table(att$Age_Group, att$Attrition)
+cc15.prop<-prop.table(cc15)*100
+cc15.prop
 
 #Dependency Test
 
-cq12.test<-t.test(att$MonthlyIncome~att$OverTime, alternative = "t")
-cq12.test
-
-#InDependent
-
-#Numerical Analysis of Performance Rating-> Monthly Income
-
-str(att)
-
-cq13<-boxplot(att$MonthlyIncome~att$PerformanceRating)
-cq13$stats
-tapply(att$MonthlyIncome, att$PerformanceRating, summary)
-
-#Dependency Test
-
-cq13.test<-t.test(att$MonthlyIncome~att$PerformanceRating, alternative="t")
-cq13.test
-
-#InDependent
-
-#Numerical Analysis of Relationship Satisfaction-> Monthly Income
-
-str(att)
-
-cq14<-boxplot(att$MonthlyIncome~att$RelationshipSatisfaction)
-cq14$stats
-tapply(att$MonthlyIncome, att$RelationshipSatisfaction, summary)
-
-#Dependency Test
-
-cq14.aov<-aov(att$MonthlyIncome~att$RelationshipSatisfaction)
-summary(cq14.aov)
-
-#InDependent
-
-#Numerical Analysis of Stock Option Level-> Monthly Income
-
-str(att)
-
-cq15<-boxplot(att$MonthlyIncome~att$StockOptionLevel)
-cq15$stats
-tapply(att$MonthlyIncome, att$StockOptionLevel, summary)
-
-#Dependency Test
-
-cq15.aov<-aov(att$MonthlyIncome~att$StockOptionLevel)
-summary(cq15.aov)
+cc15.test<-chisq.test(att$Age_Group, att$Attrition)
+cc15.test
 
 #Dependent
 
-#Numerical Analysis of Work Life Balance-> Monthly Income
+##=====================================================
+#Q->C 
 
-str(att)
+#Using Logistic regression for determining important quantitative Xs
 
-cq16<-boxplot(att$MonthlyIncome~att$WorkLifeBalance)
-cq16$stats
-tapply(att$MonthlyIncome, att$WorkLifeBalance, summary)
+lr<-glm(att$Attrition~Age+DailyRate+DistanceFromHome+EmployeeCount+EmployeeNumber+HourlyRate+MonthlyIncome+
+          MonthlyRate+NumCompaniesWorked+PercentSalaryHike+StandardHours+TotalWorkingYears+TrainingTimesLastYear+
+          YearsAtCompany+YearsInCurrentRole+YearsSinceLastPromotion+YearsWithCurrManager, data = att, family = binomial)
 
-#Dependency Test
-
-cq16.aov<-aov(att$MonthlyIncome~att$WorkLifeBalance)
-summary(cq16.aov)
-
-#InDependent
-
-#Numerical Analysis of Age Group-> Monthly Income
-
-str(att)
-
-cq17<-boxplot(att$MonthlyIncome~att$Age_Group)
-cq17$stats
-tapply(att$MonthlyIncome, att$Age_Group, summary)
-
-#Dependency Test
-
-cq17.test<-t.test(att$MonthlyIncome~att$Age_Group, alternative ="t")
-cq17.test
-
-#Dependent
+summary(lr)$coef
 
 #Removing unImportant Xs= work life balance, relationship satisfaction, performance rating, overtime, job satisfaction
 #job involvement, gender, environment satisfaction, education field, business travel, training times last year
 #percent salary hike, monthly rate, hourly rate, distance from home, daily rate
 
-att<-rm(att$WorkLifeBalance, att$RelationshipSatisfaction, att$PerformanceRating, att$OverTime,
-        att$JobSatisfaction, att$JobInvolvement, att$Gender, att$EnvironmentSatisfaction, att$EducationField,
-        att$BusinessTravel, att$TrainingTimesLastYear, att$PercentSalaryHike, att$MonthlyRate, att$HourlyRate,
-        att$DistanceFromHome, att$DailyRate)
+str(att)
+att<-att[,c(-4,-7,-9,-10,-13,-20,-22,-24,-25,-26)]
+str(att)
+
+att<-att[,-17]
+
+#Dividing into train and test
+
+set.seed(123)
+
+ind<-sample(1:nrow(att), 1000)
+train<-att[ind,]
+test<-att[-ind,]
+
+#==============Logistic Regression Model
+
+model1.lr<-glm(Attrition~., data = train, family = "binomial")
+
+coef(model1.lr)
+summary(model1.lr)
+
+predict.model1<-predict(model1.lr, newdata = test[,-1], type ="response")
+
+#Converting probablities into 0 & 1
+
+predict.model1<-ifelse(predict.model1>0.5,1,0)
+
+
+predict1.table<-table(Predicted=predict.model1, True=test$Attrition)
+
+predict1.table
+
+#Accuracy
+
+sum(predicct1.table[c(1,4)])/ sum(predicct1.table[c(1:4)])
+#=87.66
+
+#Error Rate
+1-sum(predicct1.table[c(1,4)])/ sum(predicct1.table[c(1:4)])
+#=12.34
+
+#====Decision tree Model
+
+model2.tree = tree(train$Attrition ~., data=train)
+plot(model2.tree)
+text(model2.tree)
+
+predict.model2<-predict(model2.tree, newdata = test[,-1], type = "class")
+
+predict2.table<-table(Predicted=predict.model2, True=test$Attrition)
+
+predict2.table
+
+#Accuracy
+
+sum(predict2.table[c(1,4)])/ sum(predict2.table[c(1:4)])
+#=82.34
+
+#Error Rate
+1-sum(predict2.table[c(1,4)])/ sum(predict2.table[c(1:4)])
+#=17.76
+
+#=====Random Forest Model=============
+model3.rf<-randomForest(train$Attrition~., data = train, importance=T, ntree=500)
+
+summary(model3.rf)
+
+predict.model3<-predict(model3.rf, test[,-1])
+
+predict3.table<-table(Predicted=predict.model3, True=test$Attrition)
+
+predict3.table
+
+#Accuracy
+
+sum(predict3.table[c(1,4)])/ sum(predict3.table[c(1:4)])
+#=85.95
+
+#Error Rate
+1-sum(predict3.table[c(1,4)])/ sum(predict3.table[c(1:4)])
+#=14.04
+
+#=====bagging Model=============
+model4.bagging<-randomForest(train$Attrition~., data = train, importance=T, ntree=500, mtry=19)
+
+summary(model4.bagging)
+
+predict.model4<-predict(model4.bagging, test[,-1])
+
+predict4.table<-table(Predicted=predict.model4, True=test$Attrition)
+
+predict4.table
+
+#Accuracy
+
+sum(predict4.table[c(1,4)])/ sum(predict4.table[c(1:4)])
+#=86.17
+
+#Error Rate
+1-sum(predict4.table[c(1,4)])/ sum(predict4.table[c(1:4)])
+#=13.82
+
+#====Naive Bayes Model
+
+model5.nb<-naiveBayes(train$Attrition~., data = train)
+
+model5.nb$tables
+
+#Predicting Model
+
+predict.model5<-predict(model5.nb, newdata = test[,-1], type = "class")
+
+predict5.table<-table(Predicted=predict.model5, True=test$Attrition)
+
+predict5.table
+
+#Accuracy
+
+sum(predict5.table[c(1,4)])/ sum(predict5.table[c(1:4)])
+#=78.51
+
+#Error Rate
+1-sum(predict5.table[c(1,4)])/ sum(predict5.table[c(1:4)])
+#=21.5
+
+#======================Support Vector Machine==============
+
+model6.svm<-tune(svm, train$Attrition~., data=train, kernal="radial",
+                 ranges = list(cost=c(0.1,1,10,100,1000)))
+
+#summary(model6.svm)
+
+#predict.model6<-predict(model6.svm$best, newdata= test[,-1], type="class")
+
+#=====KNN Model
+
+#model7.knn<-knn(train[,2:25], test[,2:25], train[,1], k=10)
